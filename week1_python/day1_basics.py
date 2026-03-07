@@ -3,7 +3,7 @@ from collections import Counter
 
 
 def word_counter(text: str) -> dict[str, int]:
-    words = re.findall(r'\b\w+\b', text.lower())
+    words = re.findall(r"\b\w+\b", text.lower())
     return dict(Counter(words))
 
 
@@ -38,10 +38,30 @@ def group_by_letter(items: list[str]) -> dict[str, list[str]]:
     return grouped
 
 
-if __name__ == '__main__':
-    print(word_counter("Привет, как у тебя дела? Привет, хорошо. Хорошо, это хорошо, когда хорошо."))
+if __name__ == "__main__":
+    print(
+        word_counter(
+            "Привет, как у тебя дела? Привет, хорошо. Хорошо, это хорошо, когда хорошо."
+        )
+    )
     print(remove_duplicates([1, 2, 4, 4, 5, 5, 5, 6, 1, 3, 6, 8, 8]))
     print(top_three_elements([1, 2, 4, 4, 5, 5, 5, 6, 1, 3, 6, 6, 6, 8]))
-    print(reverse_dict({'a': 1, 'b': 2, 'c': 3, 'd': 4}))
-    print(group_by_letter(
-        ['Привет', 'как,', 'у', 'тебя', 'дела', 'Привет', 'хорошо', 'Хорошо', 'это', 'хорошо', 'когда', 'хорошо']))
+    print(reverse_dict({"a": 1, "b": 2, "c": 3, "d": 4}))
+    print(
+        group_by_letter(
+            [
+                "Привет",
+                "как,",
+                "у",
+                "тебя",
+                "дела",
+                "Привет",
+                "хорошо",
+                "Хорошо",
+                "это",
+                "хорошо",
+                "когда",
+                "хорошо",
+            ]
+        )
+    )
