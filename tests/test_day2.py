@@ -3,6 +3,7 @@ from week1_python.day2_collections import (
     dictionary_for_word_len,
     sorted_list_of_words,
     multiplication_by_ten,
+    remove_empty_strings,
 )
 
 
@@ -29,7 +30,19 @@ def test_multiplication_by_ten():
     assert multiplication_by_ten([1, 2, 3, 4, 5]) == [10, 20, 30, 40, 50]
 
 
+def test_remove_empty_strings():
+    assert remove_empty_strings(["AI", "ML", "", "Python", "", "Data"]) == [
+        "AI",
+        "ML",
+        "Python",
+        "Data",
+    ]
+
+
 if __name__ == "__main__":
     test_squares_of_even_numbers()
     test_dictionary_for_word_len()
+    test_sorted_list_of_words()
+    test_multiplication_by_ten()
+    test_remove_empty_strings()
     print("Everything passed")
