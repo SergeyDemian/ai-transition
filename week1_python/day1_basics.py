@@ -32,7 +32,7 @@ def group_by_letter(items: list[str]) -> dict[str, list[str]]:
     grouped = {}
     for item in items:
         first_letter = item[0].lower()
-        if first_letter not in grouped.keys():
+        if first_letter not in grouped:
             grouped[first_letter] = []
         grouped[first_letter].append(item)
     return grouped
