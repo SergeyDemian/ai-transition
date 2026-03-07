@@ -2,6 +2,7 @@ from week1_python.day2_collections import (
     squares_of_even_numbers,
     dictionary_for_word_len,
     sorted_list_of_words,
+    multiplication_by_ten,
 )
 
 
@@ -22,6 +23,10 @@ def test_sorted_list_of_words():
         "elephant",
         "hippopotamus",
     ]
+
+
+def test_multiplication_by_ten():
+    assert multiplication_by_ten([1, 2, 3, 4, 5]) == [10, 20, 30, 40, 50]
 
 
 if __name__ == "__main__":
