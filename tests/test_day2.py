@@ -1,6 +1,7 @@
 from week1_python.day2_collections import (
     squares_of_even_numbers,
     dictionary_for_word_len,
+    sorted_list_of_words,
 )
 
 
@@ -12,6 +13,15 @@ def test_dictionary_for_word_len():
     assert dictionary_for_word_len(
         ["apple", "banana", "kiwi", "pear", "watermelon"]
     ) == {"apple": 5, "banana": 6, "kiwi": 4, "pear": 4, "watermelon": 10}
+
+
+def test_sorted_list_of_words():
+    assert sorted_list_of_words(["cat", "elephant", "dog", "hippopotamus"]) == [
+        "cat",
+        "dog",
+        "elephant",
+        "hippopotamus",
+    ]
 
 
 if __name__ == "__main__":
