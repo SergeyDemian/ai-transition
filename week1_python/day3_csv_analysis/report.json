@@ -1,0 +1,14 @@
+{
+    "total_rows": 7,
+    "average_age": 31.29,
+    "average_salary": 63142.86,
+    "city_distribution": {
+        "London": 3,
+        "Paris": 2,
+        "Berlin": 2
+    },
+    "highest_paid": {
+        "name": "Frank",
+        "salary": "80000"
+    }
+}
