@@ -9,6 +9,6 @@
     },
     "highest_paid": {
         "name": "Frank",
-        "salary": "80000"
+        "salary": 80000
     }
 }

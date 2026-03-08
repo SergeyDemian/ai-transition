@@ -13,11 +13,11 @@ def sum_by_parameter(parameter: str, rows: list[dict[str, str]]) -> int:
     return sum(int(row[parameter]) for row in rows)
 
 
-def data_average(parameter: str, rows: list[dict[str, int]]) -> float:
+def data_average(parameter: str, rows: list[dict[str, str]]) -> float:
     return round(sum_by_parameter(parameter, rows) / len(rows), 2)
 
 
-def city_counter(rows: list[dict[str, int]]) -> dict[str, int]:
+def city_counter(rows: list[dict[str, str]]) -> dict[str, int]:
     return dict(Counter(row["city"] for row in rows))
 
 
@@ -25,14 +25,14 @@ def highest_paid(rows: list[dict[str, str]]) -> dict[str, str]:
     return max(rows, key=lambda x: int(x["salary"]))
 
 
-def main():
+def main() -> None:
     with DATA_FILE.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         rows = list(reader)
 
         person = highest_paid(rows)
 
-        highest_paid_data = {"name": person["name"], "salary": person["salary"]}
+        highest_paid_data = {"name": person["name"], "salary": int(person["salary"])}
         report = {
             "total_rows": len(rows),
             "average_age": data_average("age", rows),
@@ -45,10 +45,13 @@ def main():
         print(f"Average age: {report['average_age']}")
         print(f"Average salary: {report['average_salary']}")
         print(f"Cities: {report['city_distribution']}")
-        print(f"Highest paid: {report['highest_paid']})")
+        print(
+            f"Highest paid: {report['highest_paid']['name']} "
+            f"({report['highest_paid']['salary']})"
+        )
 
-    with REPORT_FILE.open("w") as file:
-        json.dump(report, file, indent=4)
+    with REPORT_FILE.open("w", encoding="utf-8") as file:
+        json.dump(report, file, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
