@@ -9,7 +9,7 @@ def main() -> None:
     df = pd.read_csv(DATA_FILE)
 
     print("Head: ")
-    print(df.head(11))
+    print(df.head())
 
     print("\nInfo: ")
     df.info()
@@ -28,15 +28,15 @@ def main() -> None:
     survived = df["Survived"].mean()
     print(f"\nSurvived: {survived}")
 
-    survived_by_sex = df.groupby("Sex")["Survived"].mean()
+    survived_by_sex = round(df.groupby("Sex")["Survived"].mean(), 2)
     print("\nSurvived by sex: ")
     print(survived_by_sex)
 
-    survived_by_class = df.groupby("Pclass")["Survived"].mean()
+    survived_by_class = round(df.groupby("Pclass")["Survived"].mean(), 2)
     print("\nSurvived by class: ")
     print(survived_by_class)
 
-    average_age = df["Age"].mean()
+    average_age = round(df["Age"].mean(), 2)
     print(f"\nAverage by age: {average_age}")
 
     most_expensive = df.sort_values("Fare", ascending=False).head(1)
@@ -44,8 +44,8 @@ def main() -> None:
     print(most_expensive)
 
     df["fare_per_age"] = df["Fare"] / df["Age"]
-    print("Head: ")
-    print(df.head(11))
+    print("Dataset with fare per age: ")
+    print(df)
 
 
 if __name__ == "__main__":
