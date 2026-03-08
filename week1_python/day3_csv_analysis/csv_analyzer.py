@@ -1,10 +1,16 @@
 import csv
 from collections import Counter
 import json
+from pathlib import Path
 
 
-def sum_by_parameter(parameter: str, rows: list[dict[str, int]]) -> int:
-    return sum([int(row[parameter]) for row in rows])
+BASE_DIR = Path(__file__).resolve().parent
+DATA_FILE = BASE_DIR / "data.csv"
+REPORT_FILE = BASE_DIR / "report.json"
+
+
+def sum_by_parameter(parameter: str, rows: list[dict[str, str]]) -> int:
+    return sum(int(row[parameter]) for row in rows)
 
 
 def data_average(parameter: str, rows: list[dict[str, int]]) -> float:
@@ -12,7 +18,7 @@ def data_average(parameter: str, rows: list[dict[str, int]]) -> float:
 
 
 def city_counter(rows: list[dict[str, int]]) -> dict[str, int]:
-    return dict(Counter(list([row["city"] for row in rows])))
+    return dict(Counter(row["city"] for row in rows))
 
 
 def highest_paid(rows: list[dict[str, str]]) -> dict[str, str]:
@@ -20,36 +26,29 @@ def highest_paid(rows: list[dict[str, str]]) -> dict[str, str]:
 
 
 def main():
-    with open("data.csv") as f:
+    with DATA_FILE.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         rows = list(reader)
 
-        dict_highest_paid = {
-            k: v for k, v in highest_paid(rows).items() if k == "name" or k == "salary"
-        }
-        rows_length = len(rows)
-        average_age = data_average("age", rows)
-        average_salary = data_average("salary", rows)
-        cities = city_counter(rows)
+        person = highest_paid(rows)
 
-        print(f"Total rows: {rows_length}")
-        print(f"Average age: {average_age}")
-        print(f"Average salary: {average_salary}")
-        print(f"Cities: {cities}")
-        print(
-            f"Highest paid: {dict_highest_paid['name']} ({dict_highest_paid['salary']})"
-        )
-
-        data = {
-            "total_rows": rows_length,
-            "average_age": average_age,
-            "average_salary": average_salary,
-            "city_distribution": cities,
-            "highest_paid": dict_highest_paid,
+        highest_paid_data = {"name": person["name"], "salary": person["salary"]}
+        report = {
+            "total_rows": len(rows),
+            "average_age": data_average("age", rows),
+            "average_salary": data_average("salary", rows),
+            "city_distribution": city_counter(rows),
+            "highest_paid": highest_paid_data,
         }
 
-        with open("report.json", "w") as file:
-            json.dump(data, file, indent=4)
+        print(f"Total rows: {report['total_rows']}")
+        print(f"Average age: {report['average_age']}")
+        print(f"Average salary: {report['average_salary']}")
+        print(f"Cities: {report['city_distribution']}")
+        print(f"Highest paid: {report['highest_paid']})")
+
+    with REPORT_FILE.open("w") as file:
+        json.dump(report, file, indent=4)
 
 
 if __name__ == "__main__":
