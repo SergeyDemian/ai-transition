@@ -30,6 +30,8 @@ def main() -> None:
 
     model.fit(X_train, y_train)
 
+    print(model.coef_)
+
     predictions = model.predict(X_test)
 
     accuracy = accuracy_score(y_test, predictions)
