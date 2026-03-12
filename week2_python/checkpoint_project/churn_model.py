@@ -11,10 +11,22 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeClassifier
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "customer_churn.csv"
+
+
+def print_metrix(name: str, y_true, predictions) -> None:
+    print(f"\n{name}")
+    print("y_test and predictions: ")
+    print(f"\n{y_true} and {predictions}")
+    print("Accuracy:", accuracy_score(y_true, predictions))
+    print("Precision:", precision_score(y_true, predictions, zero_division=0))
+    print("Recall:", recall_score(y_true, predictions, zero_division=0))
+    print("F1:", f1_score(y_true, predictions, zero_division=0))
+    print("Confusion matrix [[TN, FP], [FN, TP]]:")
+    print(confusion_matrix(y_true, predictions))
 
 
 def main() -> None:
@@ -63,13 +75,15 @@ def main() -> None:
             "support_calls",
             "charges_per_month",
             "high_support",
+            "contract_type",
+            "tenure_group",
         ]
     ]
 
     y = df["churn"]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.25, random_state=42
+        X, y, test_size=0.25, random_state=42, stratify=y
     )
 
     model = LogisticRegression()
@@ -78,41 +92,15 @@ def main() -> None:
 
     predictions = model.predict(X_test)
 
-    accuracy = accuracy_score(y_test, predictions)
-    precision = precision_score(y_test, predictions)
-    recall = recall_score(y_test, predictions)
-    f1 = f1_score(y_test, predictions)
+    print_metrix("Model LogisticRegression", y_test, predictions)
 
-    print(f"\nAccuracy by LogisticRegression: {accuracy}")
-    print("\nPrecision:", precision)
-    print("\nRecall:", recall)
-    print("\nF1 score:", f1)
-
-    cm = confusion_matrix(y_test, predictions)
-
-    print("Confusion Matrix:")
-    print(cm)
-
-    model_dt = DecisionTreeRegressor()
+    model_dt = DecisionTreeClassifier()
 
     model_dt.fit(X_train, y_train)
 
     predictions_dt = model_dt.predict(X_test)
 
-    accuracy_dt = accuracy_score(y_test, predictions_dt)
-    precision_dt = precision_score(y_test, predictions_dt)
-    recall_dt = recall_score(y_test, predictions_dt)
-    f1_dt = f1_score(y_test, predictions_dt)
-
-    print(f"\nAccuracy by DecisionTreeRegressor: {accuracy_dt}")
-    print("\nPrecision by DecisionTreeRegressor:", precision_dt)
-    print("\nRecall by DecisionTreeRegressor:", recall_dt)
-    print("\nF1 score by DecisionTreeRegressor:", f1_dt)
-
-    cm_dt = confusion_matrix(y_test, predictions_dt)
-
-    print("Confusion Matrix by DecisionTreeRegressor:")
-    print(cm_dt)
+    print_metrix("Model DecisionTreeRegressor", y_test, predictions_dt)
 
 
 if __name__ == "__main__":
