@@ -18,10 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "titanic.csv"
 
 
-def print_metrix(name: str, y_true, predictions) -> None:
+def print_metrics(name: str, y_true, predictions) -> None:
     print(f"\n{name}")
     print("y_test and predictions: ")
-    print(f"\n{y_true} and {predictions}")
+    print("y_test:")
+    print(y_true.values)
+    print("predictions:")
+    print(predictions)
     print("Accuracy:", accuracy_score(y_true, predictions))
     print("Precision:", precision_score(y_true, predictions, zero_division=0))
     print("Recall:", recall_score(y_true, predictions, zero_division=0))
@@ -45,7 +48,7 @@ def evaluate_model(name: str, X_train, X_test, y_train, y_test) -> None:
     model = create_model(name)
     model.fit(X_train, y_train)
     predictions = model.predict(X_test)
-    print_metrix("Model LogisticRegression", y_test, predictions)
+    print_metrics(f"Model {name}", y_test, predictions)
 
 
 def create_model(name: str) -> object:
@@ -53,7 +56,7 @@ def create_model(name: str) -> object:
         case "LogisticRegression":
             model = LogisticRegression(max_iter=1000)
         case "DecisionTreeClassifier":
-            model = DecisionTreeClassifier(random_state=42)
+            model = DecisionTreeClassifier(random_state=42, max_depth=4)
         case "RandomForestClassifier":
             model = RandomForestClassifier(n_estimators=100, random_state=42)
         case _:
@@ -73,10 +76,10 @@ def main() -> None:
     df["is_alone"] = (df["family_size"] == 1).astype(int)
     df["fare_per_person"] = df["Fare"] / df["family_size"]
     df["Sex"] = df["Sex"].map({"male": 0, "female": 1})
+    df["Embarked"] = df["Embarked"].fillna("S")
     df["Embarked"] = df["Embarked"].map({"S": 0, "C": 1, "Q": 2})
 
-    df["Age"] = df["Age"].fillna(df["Age"].mean())
-    df["Embarked"] = df["Embarked"].fillna(0)
+    df["Age"] = df["Age"].fillna(df["Age"].median())
 
     X = df[
         [
