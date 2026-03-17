@@ -1,0 +1,153 @@
+from pathlib import Path
+
+import pandas as pd
+from pandas import DataFrame, Series
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix,
+)
+from sklearn.model_selection import (
+    train_test_split,
+    cross_val_score,
+    StratifiedKFold,
+    GridSearchCV,
+)
+from sklearn.tree import DecisionTreeClassifier
+
+BASE_DIR = Path(__file__).resolve().parent
+DATA_FILE = BASE_DIR / "titanic.csv"
+
+
+def print_metrics(name: str, y_true, predictions) -> None:
+    print(f"\n{name}")
+    print("y_test and predictions: ")
+    print("y_test:")
+    print(y_true.values)
+    print("predictions:")
+    print(predictions)
+    print("Accuracy:", accuracy_score(y_true, predictions))
+    print("Precision:", precision_score(y_true, predictions, zero_division=0))
+    print("Recall:", recall_score(y_true, predictions, zero_division=0))
+    print("F1:", f1_score(y_true, predictions, zero_division=0))
+    print("Confusion matrix [[TN, FP], [FN, TP]]:")
+    print(confusion_matrix(y_true, predictions))
+
+
+def print_data_info(df: DataFrame) -> None:
+    print("Head: ")
+    print(df.head())
+
+    print("\nInfo: ")
+    df.info()
+
+    print("\nDescription: ")
+    print(df.describe())
+
+
+def cross_validate_model(name: str, model, X: DataFrame, y: Series) -> None:
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    scores = cross_val_score(model, X, y, cv=cv, scoring="accuracy")
+    print(f"\n{name}")
+    print("Scores: ")
+    print(scores)
+    print("Mean:", scores.mean())
+    print("Std:", scores.std())
+
+
+def grid_search_model_evaluate(X: DataFrame, y: Series) -> None:
+    param_grid = {
+        "n_estimators": [50, 100, 200],
+        "max_depth": [3, 5, 10],
+        "min_samples_split": [2, 5],
+    }
+
+    grid = GridSearchCV(
+        RandomForestClassifier(random_state=42), param_grid, cv=5, scoring="accuracy"
+    )
+
+    grid.fit(X, y)
+
+    print("Best params:", grid.best_params_)
+    print("Best score:", grid.best_score_)
+
+
+def evaluate_model(name: str, X_train, X_test, y_train, y_test) -> None:
+    model = create_model(name)
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
+    print_metrics(f"Model {name}", y_test, predictions)
+
+
+def create_model(name: str) -> object:
+    match name:
+        case "LogisticRegression":
+            model = LogisticRegression(max_iter=1000)
+        case "DecisionTreeClassifier":
+            model = DecisionTreeClassifier(random_state=42, max_depth=4)
+        case "RandomForestClassifier":
+            model = RandomForestClassifier(n_estimators=100, random_state=42)
+        case _:
+            raise ValueError(f"Unknown model: {name}")
+    return model
+
+
+def main() -> None:
+    df = pd.read_csv(DATA_FILE)
+
+    print_data_info(df)
+
+    print("Print empty values: ")
+    print(df.isna().sum())
+
+    df["family_size"] = df["SibSp"] + df["Parch"] + 1
+    df["is_alone"] = (df["family_size"] == 1).astype(int)
+    df["fare_per_person"] = df["Fare"] / df["family_size"]
+    df["Sex"] = df["Sex"].map({"male": 0, "female": 1})
+    df["Embarked"] = df["Embarked"].fillna("S")
+    df["Embarked"] = df["Embarked"].map({"S": 0, "C": 1, "Q": 2})
+
+    df["Age"] = df["Age"].fillna(df["Age"].median())
+
+    X = df[
+        [
+            "Pclass",
+            "Sex",
+            "Age",
+            "SibSp",
+            "Parch",
+            "Fare",
+            "Embarked",
+            "family_size",
+            "is_alone",
+            "fare_per_person",
+        ]
+    ]
+
+    y = df["Survived"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    evaluate_model("LogisticRegression", X_train, X_test, y_train, y_test)
+    evaluate_model("DecisionTreeClassifier", X_train, X_test, y_train, y_test)
+    evaluate_model("RandomForestClassifier", X_train, X_test, y_train, y_test)
+
+    cross_validate_model("LogisticRegression", create_model("LogisticRegression"), X, y)
+    cross_validate_model(
+        "DecisionTreeClassifier", create_model("DecisionTreeClassifier"), X, y
+    )
+    cross_validate_model(
+        "RandomForestClassifier", create_model("RandomForestClassifier"), X, y
+    )
+
+    grid_search_model_evaluate(X, y)
+
+
+if __name__ == "__main__":
+    main()
