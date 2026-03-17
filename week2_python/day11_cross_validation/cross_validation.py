@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
@@ -11,7 +11,7 @@ from sklearn.metrics import (
     f1_score,
     confusion_matrix,
 )
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -44,21 +44,21 @@ def print_data_info(df: DataFrame) -> None:
     print(df.describe())
 
 
-def calc_scores(name: str, model, X: DataFrame, y: DataFrame) -> None:
-    scores = cross_val_score(model, X, y, cv=5)
+def cross_validate_model(name: str, model, X: DataFrame, y: Series) -> None:
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    scores = cross_val_score(model, X, y, cv=cv, scoring="accuracy")
     print(f"\n{name}")
     print("Scores: ")
     print(scores)
-    print("Mean scores: ")
-    print(scores.mean())
+    print("Mean:", scores.mean())
+    print("Std:", scores.std())
 
 
-def evaluate_model(name: str, X_train, X_test, y_train, y_test) -> object:
+def evaluate_model(name: str, X_train, X_test, y_train, y_test) -> None:
     model = create_model(name)
     model.fit(X_train, y_train)
     predictions = model.predict(X_test)
     print_metrics(f"Model {name}", y_test, predictions)
-    return model
 
 
 def create_model(name: str) -> object:
@@ -112,17 +112,17 @@ def main() -> None:
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    model_lr = evaluate_model("LogisticRegression", X_train, X_test, y_train, y_test)
-    model_dtc = evaluate_model(
-        "DecisionTreeClassifier", X_train, X_test, y_train, y_test
-    )
-    model_rfc = evaluate_model(
-        "RandomForestClassifier", X_train, X_test, y_train, y_test
-    )
+    evaluate_model("LogisticRegression", X_train, X_test, y_train, y_test)
+    evaluate_model("DecisionTreeClassifier", X_train, X_test, y_train, y_test)
+    evaluate_model("RandomForestClassifier", X_train, X_test, y_train, y_test)
 
-    calc_scores("LogisticRegression", model_lr, X, y)
-    calc_scores("DecisionTreeClassifier", model_dtc, X, y)
-    calc_scores("RandomForestClassifier", model_rfc, X, y)
+    cross_validate_model("LogisticRegression", create_model("LogisticRegression"), X, y)
+    cross_validate_model(
+        "DecisionTreeClassifier", create_model("DecisionTreeClassifier"), X, y
+    )
+    cross_validate_model(
+        "RandomForestClassifier", create_model("RandomForestClassifier"), X, y
+    )
 
 
 if __name__ == "__main__":
