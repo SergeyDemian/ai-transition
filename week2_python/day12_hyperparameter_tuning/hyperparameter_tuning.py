@@ -66,14 +66,25 @@ def grid_search_model_evaluate(X: DataFrame, y: Series) -> None:
         "min_samples_split": [2, 5],
     }
 
-    grid = GridSearchCV(
-        RandomForestClassifier(random_state=42), param_grid, cv=5, scoring="accuracy"
-    )
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
+    baseline_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    baseline_scores = cross_val_score(baseline_model, X, y, cv=cv, scoring="accuracy")
+
+    grid = GridSearchCV(
+        RandomForestClassifier(random_state=42),
+        param_grid,
+        cv=cv,
+        scoring="accuracy",
+    )
     grid.fit(X, y)
 
+    print("\nRandomForest Grid Search")
+    print("Baseline mean:", baseline_scores.mean())
+    print("Baseline std:", baseline_scores.std())
     print("Best params:", grid.best_params_)
     print("Best score:", grid.best_score_)
+    print("Improvement:", grid.best_score_ - baseline_scores.mean())
 
 
 def evaluate_model(name: str, X_train, X_test, y_train, y_test) -> None:
